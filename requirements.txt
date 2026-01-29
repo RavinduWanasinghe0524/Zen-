@@ -1,0 +1,30 @@
+# Zen Voice Assistant - Python Dependencies (Phase 4)
+
+# Core Speech Recognition & Synthesis
+SpeechRecognition>=3.10.0
+pyttsx3>=2.90
+PyAudio>=0.2.13
+
+# AI Providers
+openai>=1.0.0
+google-generativeai>=0.3.0
+ollama>=0.1.0
+
+# System Utilities
+psutil>=5.9.0
+python-dotenv>=1.0.0
+
+# Audio Control (Optional - for volume control)
+pycaw>=20181226
+comtypes>=1.2.0
+
+# Wake Word Detection (Optional - Phase 4)
+# Note: pvporcupine requires account and access key from Picovoice Console
+# Install if you want advanced wake word detection: pip install pvporcupine
+# pvporcupine>=2.2.0
+
+# GUI (tkinter comes with Python on Windows, no need to install)
+
+# Note: If PyAudio installation fails on Windows, use:
+# pip install pipwin
+# pipwin install pyaudio
