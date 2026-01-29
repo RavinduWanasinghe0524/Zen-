@@ -24,11 +24,14 @@ class SpeechListener:
         """Initialize the microphone with error handling."""
         try:
             self.microphone = sr.Microphone()
-            # Adjust for ambient noise
+            # Adjust for ambient noise with longer calibration
             with self.microphone as source:
-                logger.info("Calibrating for ambient noise... Please wait.")
-                self.recognizer.adjust_for_ambient_noise(source, duration=1)
-                logger.info("Microphone initialized successfully.")
+                logger.info("Calibrating for ambient noise... Please be quiet for 3 seconds.")
+                self.recognizer.adjust_for_ambient_noise(source, duration=3)
+                # Lower energy threshold for better sensitivity
+                self.recognizer.energy_threshold = 300
+                self.recognizer.dynamic_energy_threshold = True
+                logger.info(f"Microphone initialized. Energy threshold: {self.recognizer.energy_threshold}")
         except Exception as e:
             logger.error(f"Failed to initialize microphone: {e}")
             raise

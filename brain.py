@@ -62,9 +62,9 @@ class AIBrain:
         try:
             import google.generativeai as genai
             genai.configure(api_key=Config.GEMINI_API_KEY)
-            self.client = genai.GenerativeModel('gemini-pro')
+            self.client = genai.GenerativeModel('gemini-1.5-flash')
             self.chat_session = self.client.start_chat(history=[])
-            logger.info("Gemini client initialized")
+            logger.info("Gemini client initialized with gemini-1.5-flash")
         except ImportError:
             raise ImportError("google-generativeai package not installed. Run: pip install google-generativeai")
     
