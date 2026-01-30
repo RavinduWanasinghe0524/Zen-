@@ -20,9 +20,24 @@ class Config:
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
     OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama2")
     
+    # Futuristic AI Features
+    ENABLE_VISION = os.getenv("ENABLE_VISION", "false").lower() == "true"
+    VISION_PROVIDER = os.getenv("VISION_PROVIDER", "openai")  # openai, gemini
+    ENABLE_IMAGE_GENERATION = os.getenv("ENABLE_IMAGE_GENERATION", "false").lower() == "true"
+    
     # Voice Settings
     SPEECH_RATE = int(os.getenv("SPEECH_RATE", "150"))  # Words per minute
     SPEECH_VOLUME = float(os.getenv("SPEECH_VOLUME", "0.9"))  # 0.0 to 1.0
+    
+    # Neural Voice Synthesis (Advanced)
+    NEURAL_VOICE_ENABLED = os.getenv("NEURAL_VOICE_ENABLED", "false").lower() == "true"
+    NEURAL_VOICE_PROVIDER = os.getenv("NEURAL_VOICE_PROVIDER", "elevenlabs")  # elevenlabs, azure, openai
+    ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
+    ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")
+    AZURE_SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY", "")
+    AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION", "eastus")
+    OPENAI_VOICE = os.getenv("OPENAI_VOICE", "nova")  # alloy, echo, fable, onyx, nova, shimmer
+    VOICE_EMOTION = os.getenv("VOICE_EMOTION", "neutral")  # neutral, happy, sad, excited, calm
     
     # Recognition Settings
     LISTEN_TIMEOUT = int(os.getenv("LISTEN_TIMEOUT", "5"))  # Seconds
@@ -35,8 +50,10 @@ class Config:
     
     # GUI Settings
     GUI_ENABLED = os.getenv("GUI_ENABLED", "true").lower() == "true"
+    GUI_MODE = os.getenv("GUI_MODE", "neural")  # classic, neural
+    GUI_THEME = os.getenv("GUI_THEME", "cyber_blue")  # cyber_blue, neural_purple, quantum_orange, dark_matter, etc.
     GUI_POSITION = os.getenv("GUI_POSITION", "bottom-right")  # top-left, top-right, bottom-left, bottom-right
-    GUI_OPACITY = float(os.getenv("GUI_OPACITY", "0.9"))
+    GUI_OPACITY = float(os.getenv("GUI_OPACITY", "0.95"))
     GUI_ALWAYS_ON_TOP = os.getenv("GUI_ALWAYS_ON_TOP", "true").lower() == "true"
     
     # Performance Settings
@@ -65,12 +82,22 @@ Remember: You're speaking, not typing, so avoid overly long explanations."""
     # Conversation History
     MAX_HISTORY_LENGTH = int(os.getenv("MAX_HISTORY_LENGTH", "10"))  # Number of messages to keep
     
+    # Advanced Memory & Context
+    ENABLE_LONG_TERM_MEMORY = os.getenv("ENABLE_LONG_TERM_MEMORY", "false").lower() == "true"
+    MEMORY_DB_PATH = os.getenv("MEMORY_DB_PATH", "./data/memory.db")
+    ENABLE_PERSONALITY_LEARNING = os.getenv("ENABLE_PERSONALITY_LEARNING", "false").lower() == "true"
+    
     # Logging
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
     LOG_TO_FILE = os.getenv("LOG_TO_FILE", "true").lower() == "true"
     LOG_ROTATION_SIZE_MB = int(os.getenv("LOG_ROTATION_SIZE_MB", "10"))
     LOG_RETENTION_DAYS = int(os.getenv("LOG_RETENTION_DAYS", "7"))
     DEBUG_MODE = os.getenv("DEBUG_MODE", "false").lower() == "true"
+    
+    # Security & Privacy
+    ENABLE_ENCRYPTION = os.getenv("ENABLE_ENCRYPTION", "false").lower() == "true"
+    LOCAL_PROCESSING_MODE = os.getenv("LOCAL_PROCESSING_MODE", "false").lower() == "true"
+    ENABLE_BIOMETRIC_AUTH = os.getenv("ENABLE_BIOMETRIC_AUTH", "false").lower() == "true"
     
     @classmethod
     def get_api_key(cls):
