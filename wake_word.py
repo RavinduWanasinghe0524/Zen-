@@ -13,22 +13,31 @@ logger = get_logger(__name__)
 class WakeWordDetector:
     """Handles wake word detection for passive activation."""
     
-    def __init__(self, wake_word="zen", sensitivity=0.5, callback=None):
+    def __init__(self, wake_words=None, sensitivity=0.5, callback=None):
         """
         Initialize wake word detector.
         
         Args:
-            wake_word: Wake word to detect (default: "zen")
+            wake_words: List of wake words to detect (default: ["zen", "activate"])
             sensitivity: Detection sensitivity 0.0-1.0
             callback: Function to call when wake word detected
         """
-        self.wake_word = wake_word.lower()
+        if wake_words is None:
+            wake_words = ["zen", "activate"]
+        
+        # Ensure wake_words is a list and convert to lowercase
+        if isinstance(wake_words, str):
+            wake_words = [wake_words]
+        
+        self.wake_words = [word.lower() for word in wake_words]
         self.sensitivity = sensitivity
         self.callback = callback
         self.running = False
         self.thread = None
         self.use_porcupine = False
         self.porcupine = None
+        
+        logger.info(f"Wake words configured: {', '.join(self.wake_words)}")
         
         # Try to initialize Porcupine for accurate wake word detection
         try:
@@ -120,8 +129,8 @@ class WakeWordDetector:
                 logger.info("Calibrating for wake word detection...")
                 recognizer.adjust_for_ambient_noise(source, duration=1)
             
-            logger.info(f"Listening for wake word: '{self.wake_word}' (Speech recognition mode)...")
-            logger.info("Say 'Hey Zen' or just 'Zen' to activate")
+            logger.info(f"Listening for wake words: {', '.join(self.wake_words)} (Speech recognition mode)...")
+            logger.info("Say 'Hey Zen', 'Zen', 'Activate', or 'Hey Activate' to activate")
             
             while self.running:
                 try:
@@ -133,11 +142,16 @@ class WakeWordDetector:
                         text = recognizer.recognize_google(audio).lower()
                         logger.debug(f"Heard: {text}")
                         
-                        # Check if wake word is in the text
-                        if self.wake_word in text or f"hey {self.wake_word}" in text:
-                            logger.info(f"Wake word detected: {text}")
-                            if self.callback:
-                                self.callback()
+                        # Check if any wake word is in the text
+                        detected = False
+                        for wake_word in self.wake_words:
+                            if wake_word in text or f"hey {wake_word}" in text:
+                                logger.info(f"Wake word detected: '{wake_word}' in '{text}'")
+                                detected = True
+                                break
+                        
+                        if detected and self.callback:
+                            self.callback()
                     
                     except sr.UnknownValueError:
                         # Couldn't understand - continue listening
@@ -197,10 +211,10 @@ if __name__ == "__main__":
     def on_wake_word():
         print("\n🎤 WAKE WORD DETECTED! Zen is now listening...\n")
     
-    detector = WakeWordDetector(wake_word="zen", callback=on_wake_word)
+    detector = WakeWordDetector(wake_words=["zen", "activate"], callback=on_wake_word)
     
     print("Starting wake word detection...")
-    print("Say 'Hey Zen' or 'Zen' to test activation")
+    print("Say 'Hey Zen', 'Zen', 'Activate', or 'Hey Activate' to test activation")
     print("Press Ctrl+C to stop\n")
     
     try:

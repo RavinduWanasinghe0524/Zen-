@@ -10,6 +10,10 @@ A powerful, modular desktop voice assistant for Windows that combines speech rec
 - **🛠️ OS Automation**: Open applications, search the web, get system info, and more
 - **💬 Contextual Conversations**: Maintains conversation history for natural interactions
 - **⚙️ Configurable**: Easy configuration via environment variables
+- **🚀 Auto-Start**: Automatically starts on Windows boot
+- **📋 Daily Tasks**: Manage and get voice announcements of your daily tasks
+- **🎙️ Wake Words**: Say "Zen" or "Activate" to wake the assistant
+
 
 ## 🏗️ Architecture
 
@@ -95,7 +99,56 @@ zen/
 python main.py
 ```
 
-### Voice Commands
+## 🎯 New Features
+
+### 🚀 Auto-Start on Windows Boot
+
+See [AUTOSTART_GUIDE.md](AUTOSTART_GUIDE.md) for complete instructions.
+
+**Quick Setup:**
+```powershell
+powershell -ExecutionPolicy Bypass -File setup_autostart.ps1
+```
+
+This configures Windows Task Scheduler to start Zen automatically when you log in.
+
+### 📋 Daily Task Management
+
+Manage your daily tasks with voice commands:
+
+**Add a task:**
+```
+"Add a task meeting at 3pm"
+```
+
+**Check your tasks:**
+```
+"What are my tasks for today?"
+```
+
+**Via Python (advanced):**
+```python
+from daily_tasks import DailyTaskManager
+tm = DailyTaskManager()
+tm.add_task("Task name", "Description", "2026-02-01", "high")
+```
+
+### 🎙️ Wake Word Activation
+
+Enable wake word mode in `.env`:
+```env
+WAKE_WORD_ENABLED=true
+```
+
+Then say "Zen", "Activate", or "Hey Zen" to activate the assistant!
+
+## 🎮 Usage
+
+
+**Daily Tasks:**
+- "What are my tasks for today?"
+- "Add a task [description]"
+- "Show all tasks"
 
 **System Commands:**
 - "Open Notepad"
@@ -115,6 +168,13 @@ python main.py
 - "Exit"
 - "Goodbye"
 - "Quit"
+
+**Wake Words (when wake word mode enabled):**
+- "Zen"
+- "Hey Zen"
+- "Activate"
+- "Hey Activate"
+
 
 ### Testing Individual Components
 
@@ -187,12 +247,17 @@ Edit `.env` file to customize settings:
 
 ## 🚧 Future Enhancements
 
-- [ ] Wake word detection ("Hey Zen")
-- [ ] GUI with visual feedback
+- [x] Wake word detection ("Hey Zen", "Activate") ✅
+- [x] GUI with visual feedback ✅
+- [x] Daily task management ✅
+- [x] Auto-start on Windows boot ✅
 - [ ] More OS automation tools
 - [ ] Plugin system for custom tools
 - [ ] Multi-language support
 - [ ] Voice cloning for personalized responses
+- [ ] Calendar integration (Google Calendar, Outlook)
+- [ ] System tray integration
+
 
 ## 📝 License
 
