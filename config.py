@@ -48,6 +48,13 @@ class Config:
     WAKE_WORD = os.getenv("WAKE_WORD", "zen")
     WAKE_WORD_SENSITIVITY = float(os.getenv("WAKE_WORD_SENSITIVITY", "0.5"))
     
+    # Daily Tasks Settings
+    DAILY_TASK_FILE = os.getenv("DAILY_TASK_FILE", "tasks_data.json")
+    ANNOUNCE_TASKS_ON_STARTUP = os.getenv("ANNOUNCE_TASKS_ON_STARTUP", "true").lower() == "true"
+    AUTO_START_ENABLED = os.getenv("AUTO_START_ENABLED", "true").lower() == "true"
+    START_MINIMIZED = os.getenv("START_MINIMIZED", "false").lower() == "true"
+
+    
     # GUI Settings
     GUI_ENABLED = os.getenv("GUI_ENABLED", "true").lower() == "true"
     GUI_MODE = os.getenv("GUI_MODE", "neural")  # classic, neural

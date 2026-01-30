@@ -10,6 +10,7 @@ from speak import SpeechSynthesizer
 from brain import AIBrain
 from tools import ZenTools
 from config import Config
+from daily_tasks import DailyTaskManager
 from logger import get_logger, ZenLogger
 
 # Initialize enhanced logging system
@@ -60,6 +61,10 @@ class ZenAssistant:
             self.tools = ZenTools()
             self.running = False
             
+            # Daily task manager
+            self.task_manager = DailyTaskManager(Config.DAILY_TASK_FILE)
+            logger.info(f"Daily task manager initialized with {len(self.task_manager.get_all_tasks())} tasks")
+            
             # Phase 4: Optional components
             self.gui = None
             self.wake_word_detector = None
@@ -82,8 +87,9 @@ class ZenAssistant:
             # Initialize wake word detector if enabled and available
             if Config.WAKE_WORD_ENABLED and wake_word_available:
                 try:
+                    # Support multiple wake words: zen, activate
                     self.wake_word_detector = WakeWordDetector(
-                        wake_word=Config.WAKE_WORD,
+                        wake_words=[Config.WAKE_WORD, "activate"],
                         sensitivity=Config.WAKE_WORD_SENSITIVITY,
                         callback=self._on_wake_word
                     )
@@ -125,6 +131,32 @@ class ZenAssistant:
         if any(word in text_lower for word in ["exit", "quit", "goodbye", "bye zen"]):
             self.speaker.speak("Goodbye! Have a great day!")
             self.running = False
+            return True
+        
+        # Daily task commands
+        if any(phrase in text_lower for phrase in ["tasks for today", "today's tasks", "what are my tasks"]):
+            summary = self.task_manager.get_task_summary()
+            self.speaker.speak(summary)
+            return True
+        
+        if "show all tasks" in text_lower or "list all tasks" in text_lower:
+            all_tasks = self.task_manager.get_pending_tasks()
+            if all_tasks:
+                response = f"You have {len(all_tasks)} pending tasks."
+                self.speaker.speak(response)
+            else:
+                self.speaker.speak("You have no pending tasks.")
+            return True
+        
+        if "add a task" in text_lower or "add task" in text_lower:
+            # Extract task description
+            match = re.search(r'add (?:a )?task\s+(.+)', text_lower)
+            if match:
+                task_desc = match.group(1)
+                self.task_manager.add_task(task_desc, "", None, "medium")
+                self.speaker.speak(f"Task added: {task_desc}")
+            else:
+                self.speaker.speak("What task would you like to add?")
             return True
         
         # Open application commands
@@ -226,18 +258,31 @@ class ZenAssistant:
             if self.gui:
                 self.gui.set_state(ZenGUI.STATE_WAKE_WORD)
     
+    def _announce_daily_tasks(self):
+        """Announce daily tasks on startup."""
+        if Config.ANNOUNCE_TASKS_ON_STARTUP:
+            try:
+                summary = self.task_manager.get_task_summary()
+                logger.info(f"Task summary: {summary}")
+                self.speaker.speak(summary)
+            except Exception as e:
+                logger.error(f"Failed to announce tasks: {e}")
+    
     def run(self):
         """Main conversation loop."""
         self.running = True
         
         # Greet the user
         if self.wake_word_mode:
-            greeting = f"Hello! I'm Zen. Say '{Config.WAKE_WORD}' or 'Hey {Config.WAKE_WORD}' to activate me."
+            greeting = f"Hello! I'm Zen. Say 'Zen', 'Activate', or 'Hey Zen' to talk to me."
         else:
             greeting = "Hello! I'm Zen, your voice assistant. How can I help you today?"
         
         print(f"\n{greeting}")
         self.speaker.speak(greeting)
+        
+        # Announce daily tasks after greeting
+        self._announce_daily_tasks()
         
         print("\n" + "="*70)
         print("🎤 ZEN VOICE ASSISTANT - Ready")
@@ -248,6 +293,7 @@ class ZenAssistant:
             print(f"   (Listening passively...)")
         else:
             print("\n📝 Available Commands:")
+            print("   • 'What are my tasks for today?' / 'Add a task [description]'")
             print("   • 'Open Notepad' / 'Open Calculator' / 'Open Chrome'")
             print("   • 'What time is it?'")
             print("   • 'Search for [topic]'")
