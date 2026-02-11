@@ -15,9 +15,83 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+from memory import ZenMemory
+from app_control import AppController
+from research import ZenResearcher
+
 class ZenTools:
     """Collection of OS automation tools for Zen."""
     
+    def __init__(self):
+        self.memory = ZenMemory()
+        self.app_controller = AppController()
+        self.researcher = ZenResearcher()
+    
+    def remember_fact(self, fact: str) -> str:
+        """
+        Store a fact or piece of information in long-term memory.
+        
+        Args:
+            fact: The information to remember
+            
+        Returns:
+            Confirmation message
+        """
+        self.memory.remember(fact)
+        return "I've stored that in my official memory."
+
+    def recall_memories(self, query: str) -> str:
+        """
+        Search long-term memory for information.
+        
+        Args:
+            query: The topic or question to search for
+            
+        Returns:
+            Combined string of matching memories
+        """
+        results = self.memory.recall(query, limit=3)
+        if results:
+            memories = "\n".join([f"- {r['text']}" for r in results])
+            return f"Here is what I found in my memory:\n{memories}"
+        return "I couldn't find any relevant memories about that."
+
+    def research_topic(self, query: str) -> str:
+        """
+        Research a topic by searching the web and summarizing results.
+        
+        Args:
+            query: The topic to research
+            
+        Returns:
+            Summary of research findings
+        """
+        return self.researcher.search_and_summarize(query)
+
+    def control_media(self, action: str) -> str:
+        """
+        Control music or video playback.
+        
+        Args:
+            action: 'play', 'pause', 'next', 'previous', 'volume_up', 'volume_down'
+            
+        Returns:
+            Status message
+        """
+        return self.app_controller.control_media(action)
+
+    def play_youtube(self, query: str) -> str:
+        """
+        Search and play a video on YouTube.
+        
+        Args:
+            query: The video to search for
+            
+        Returns:
+            Status message
+        """
+        return self.app_controller.play_on_youtube(query)
+
     @staticmethod
     def open_application(app_name: str) -> str:
         """
