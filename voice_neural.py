@@ -71,7 +71,7 @@ class NeuralVoice:
             if not speech_key:
                 raise ValueError("AZURE_SPEECH_KEY not configured")
             
-            speech_config = speechsdk.SpeechConfig(subscription=speech key, region=speech_region)
+            speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=speech_region)
             speech_config.speech_synthesis_voice_name = "en-US-JennyNeural"  # Premium neural voice
             
             self.client = speechsdk.SpeechSynthesizer(speech_config=speech_config)
