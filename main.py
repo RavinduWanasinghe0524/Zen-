@@ -149,6 +149,11 @@ class ZenAssistant:
             "set_volume": ("Sets system volume.", {"level": {"type": "integer", "description": "Volume from 0-100."}}),
             "shutdown_system": ("Shuts down the computer.", {"confirm": {"type": "boolean", "description": "Must be true."}}),
             "restart_system": ("Restarts the computer.", {"confirm": {"type": "boolean", "description": "Must be true."}}),
+            "remember_fact": ("Stores a fact or preference in long-term memory.", {"fact": {"type": "string", "description": "The information to remember permanently."}}),
+            "recall_memories": ("Search long-term memory for information.", {"query": {"type": "string", "description": "The topic to search for."}}),
+            "control_media": ("Controls media playback (Spotify, etc).", {"action": {"type": "string", "enum": ["play", "pause", "next", "previous", "volume_up", "volume_down"], "description": "The media action to perform."}}),
+            "play_youtube": ("Plays a video on YouTube.", {"query": {"type": "string", "description": "The video to search for."}}),
+            "research_topic": ("Researches a topic online and provides a summary.", {"query": {"type": "string", "description": "The topic to research."}}),
         }
 
         for name, (desc, props) in tool_methods.items():
