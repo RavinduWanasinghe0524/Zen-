@@ -1,9 +1,10 @@
 """
-Zen Voice Assistant - Main Application (Phase 4 Enhanced)
-Orchestrates all components with wake word detection, GUI overlay, and advanced features.
+Zen Voice Assistant - Main Application (v4.0 Epic & Futuristic)
+Orchestrates all components, including AI-driven tool use and vision capabilities.
 """
 
 import threading
+import time
 import re
 from listen import SpeechListener
 from speak import SpeechSynthesizer
@@ -19,386 +20,294 @@ ZenLogger.initialize(
     log_to_file=Config.LOG_TO_FILE,
     debug_mode=Config.DEBUG_MODE
 )
-
 logger = get_logger(__name__)
 
-# Optional Phase 4 imports with graceful degradation
+# --- Optional Module Imports ---
 wake_word_available = False
 gui_available = False
+neural_gui_available = False
+neural_voice_available = False
+vision_available = False
 
 try:
     if Config.WAKE_WORD_ENABLED:
         from wake_word import WakeWordDetector
         wake_word_available = True
-        logger.info("Wake word detection module loaded")
+        logger.info("Wake word detection module loaded.")
 except ImportError as e:
-    logger.warning(f"Wake word detection not available: {e}")
+    logger.warning(f"Wake word module not available: {e}")
 
 try:
     if Config.GUI_ENABLED:
-        from gui import ZenGUI
-        gui_available = True
-        logger.info("GUI overlay module loaded")
+        if Config.GUI_MODE == 'neural':
+            from gui_neural import NeuralGUI
+            neural_gui_available = True
+            logger.info("Neural GUI module loaded.")
+        else:
+            from gui import ZenGUI
+            gui_available = True
+            logger.info("Classic GUI module loaded.")
 except ImportError as e:
-    logger.warning(f"GUI overlay not available: {e}")
+    logger.warning(f"GUI module '{Config.GUI_MODE}' not available: {e}")
+
+try:
+    if Config.NEURAL_VOICE_ENABLED:
+        from voice_neural import NeuralVoice
+        neural_voice_available = True
+        logger.info("Neural Voice module loaded.")
+except ImportError as e:
+    logger.warning(f"Neural Voice not available: {e}")
+
+try:
+    if Config.ENABLE_VISION:
+        from ai_vision import AIVision
+        vision_available = True
+        logger.info("AI Vision module loaded.")
+except ImportError as e:
+    logger.warning(f"AI Vision module not available: {e}")
 
 
 class ZenAssistant:
-    """Main voice assistant orchestrator with Phase 4 enhancements."""
+    """Main voice assistant orchestrator with AI-driven tool use and vision."""
     
     def __init__(self):
         """Initialize all components."""
-        logger.info("Initializing Zen Voice Assistant v2.0...")
+        logger.info("Initializing Zen Voice Assistant v4.0 (Futuristic Edition)...")
         
         try:
-            # Core components
             self.listener = SpeechListener()
-            self.speaker = SpeechSynthesizer(
-                rate=Config.SPEECH_RATE,
-                volume=Config.SPEECH_VOLUME
-            )
             self.brain = AIBrain()
             self.tools = ZenTools()
+            self.vision = None
             self.running = False
             
-            # Daily task manager
-            self.task_manager = DailyTaskManager(Config.DAILY_TASK_FILE)
-            logger.info(f"Daily task manager initialized with {len(self.task_manager.get_all_tasks())} tasks")
+            if Config.ENABLE_VISION and vision_available:
+                try:
+                    self.vision = AIVision(provider=Config.VISION_PROVIDER)
+                    logger.info("AI Vision system initialized.")
+                except Exception as e:
+                    logger.error(f"Failed to initialize AI Vision: {e}")
+                    vision_available = False
+
+            self._register_all_tools()
+            self.brain.finish_initialization()
+
+            if Config.NEURAL_VOICE_ENABLED and neural_voice_available:
+                self.speaker = NeuralVoice()
+            else:
+                self.speaker = SpeechSynthesizer(rate=Config.SPEECH_RATE, volume=Config.SPEECH_VOLUME)
             
-            # Phase 4: Optional components
+            self.task_manager = DailyTaskManager(Config.DAILY_TASK_FILE)
             self.gui = None
             self.wake_word_detector = None
             self.wake_word_mode = False
             
-            # Initialize GUI if enabled and available
-            if Config.GUI_ENABLED and gui_available:
-                try:
-                    self.gui = ZenGUI(
-                        position=Config.GUI_POSITION,
-                        opacity=Config.GUI_OPACITY,
-                        always_on_top=Config.GUI_ALWAYS_ON_TOP
-                    )
-                    self.gui.start()
-                    logger.info("GUI overlay initialized")
-                except Exception as e:
-                    logger.error(f"Failed to initialize GUI: {e}")
-                    self.gui = None
+            if Config.GUI_ENABLED:
+                self._initialize_gui()
             
-            # Initialize wake word detector if enabled and available
             if Config.WAKE_WORD_ENABLED and wake_word_available:
-                try:
-                    # Support multiple wake words: zen, activate
-                    self.wake_word_detector = WakeWordDetector(
-                        wake_words=[Config.WAKE_WORD, "activate"],
-                        sensitivity=Config.WAKE_WORD_SENSITIVITY,
-                        callback=self._on_wake_word
-                    )
-                    self.wake_word_mode = True
-                    logger.info("Wake word detection initialized")
-                except Exception as e:
-                    logger.error(f"Failed to initialize wake word detection: {e}")
-                    self.wake_word_detector = None
-                    self.wake_word_mode = False
+                self._initialize_wake_word()
             
             logger.info("Zen Voice Assistant initialized successfully!")
             
         except Exception as e:
-            logger.error(f"Failed to initialize Zen: {e}", exc_info=True)
+            logger.error(f"Fatal error during initialization: {e}", exc_info=True)
             raise
+
+    def _initialize_gui(self):
+        try:
+            if Config.GUI_MODE == 'neural' and neural_gui_available:
+                self.gui = NeuralGUI(theme=Config.GUI_THEME, opacity=Config.GUI_OPACITY, always_on_top=Config.GUI_ALWAYS_ON_TOP)
+            elif gui_available:
+                self.gui = ZenGUI(position=Config.GUI_POSITION, opacity=Config.GUI_OPACITY, always_on_top=Config.GUI_ALWAYS_ON_TOP)
+            
+            if self.gui:
+                self.gui.start()
+                logger.info(f"{Config.GUI_MODE.capitalize()} GUI initialized.")
+        except Exception as e:
+            logger.error(f"Failed to initialize GUI: {e}")
+            self.gui = None
+
+    def _initialize_wake_word(self):
+        try:
+            self.wake_word_detector = WakeWordDetector(wake_words=[Config.WAKE_WORD, "activate"], sensitivity=Config.WAKE_WORD_SENSITIVITY, callback=self._on_wake_word)
+            self.wake_word_mode = True
+            logger.info("Wake word detection initialized.")
+        except Exception as e:
+            logger.error(f"Failed to initialize wake word detector: {e}")
     
+    def _register_all_tools(self):
+        """Defines and registers all available tools with the AI brain."""
+        logger.info("Registering AI tools...")
+        
+        # Register standard tools
+        tool_methods = {
+            "open_application": ("Opens a desktop application.", {"app_name": {"type": "string", "description": "e.g., 'notepad', 'chrome'"}}),
+            "get_current_time": ("Gets the current date and time.", {}),
+            "search_web": ("Searches Google.", {"query": {"type": "string", "description": "The search term."}}),
+            "get_system_info": ("Gets computer CPU and memory usage.", {}),
+            "set_volume": ("Sets system volume.", {"level": {"type": "integer", "description": "Volume from 0-100."}}),
+            "shutdown_system": ("Shuts down the computer.", {"confirm": {"type": "boolean", "description": "Must be true."}}),
+            "restart_system": ("Restarts the computer.", {"confirm": {"type": "boolean", "description": "Must be true."}}),
+        }
+
+        for name, (desc, props) in tool_methods.items():
+            self.brain.register_tool(
+                name=name,
+                description=desc,
+                function=getattr(self.tools, name),
+                parameters={"type": "object", "properties": props, "required": list(props.keys())}
+            )
+
+        # Register vision tools if available
+        if self.vision:
+            self.brain.register_tool(
+                name="analyze_screen",
+                description="Analyzes the content of the screen and answers a question about it.",
+                function=self.vision.analyze_screen,
+                parameters={
+                    "type": "object",
+                    "properties": {
+                        "question": {
+                            "type": "string",
+                            "description": "The question to ask about the screen's content."
+                        }
+                    },
+                    "required": ["question"]
+                }
+            )
+        
+        logger.info(f"{len(self.brain.tools)} tools registered successfully.")
+
     def _on_wake_word(self):
-        """Callback when wake word is detected."""
         logger.info("Wake word detected - activating")
-        if self.gui:
-            self.gui.show_message("🎤 Activated", 1000)
+        if self.gui: self.gui.show_message("🎤 Activated", 1000)
         self.speaker.speak("Yes?")
-        # Process one command then go back to wake word mode
         self._process_single_command()
     
-    def _check_keyword_commands(self, text: str) -> bool:
-        """
-        Check for direct keyword commands and execute them.
-        
-        Args:
-            text: User's input text
-            
-        Returns:
-            True if a command was executed, False otherwise
-        """
-        text_lower = text.lower()
-        
-        # Exit commands
-        if any(word in text_lower for word in ["exit", "quit", "goodbye", "bye zen"]):
+    def process_input(self, user_input: str):
+        if any(word in user_input.lower() for word in ["exit", "quit", "goodbye", "bye zen"]):
             self.speaker.speak("Goodbye! Have a great day!")
             self.running = False
-            return True
-        
-        # Daily task commands
-        if any(phrase in text_lower for phrase in ["tasks for today", "today's tasks", "what are my tasks"]):
-            summary = self.task_manager.get_task_summary()
-            self.speaker.speak(summary)
-            return True
-        
-        if "show all tasks" in text_lower or "list all tasks" in text_lower:
-            all_tasks = self.task_manager.get_pending_tasks()
-            if all_tasks:
-                response = f"You have {len(all_tasks)} pending tasks."
-                self.speaker.speak(response)
-            else:
-                self.speaker.speak("You have no pending tasks.")
-            return True
-        
-        if "add a task" in text_lower or "add task" in text_lower:
-            # Extract task description
-            match = re.search(r'add (?:a )?task\s+(.+)', text_lower)
-            if match:
-                task_desc = match.group(1)
-                self.task_manager.add_task(task_desc, "", None, "medium")
-                self.speaker.speak(f"Task added: {task_desc}")
-            else:
-                self.speaker.speak("What task would you like to add?")
-            return True
-        
-        # Open application commands
-        if "open" in text_lower:
-            # Extract app name
-            match = re.search(r'open\s+(\w+)', text_lower)
-            if match:
-                app_name = match.group(1)
-                result = self.tools.open_application(app_name)
-                self.speaker.speak(result)
-                return True
-        
-        # Time command
-        if any(phrase in text_lower for phrase in ["what time", "current time", "what's the time"]):
-            result = self.tools.get_current_time()
-            self.speaker.speak(result)
-            return True
-        
-        # Search web command
-        if "search for" in text_lower or ("search" in text_lower and "google" in text_lower):
-            match = re.search(r'search\s+(?:for\s+)?(.+)', text_lower)
-            if match:
-                query = match.group(1)
-                result = self.tools.search_web(query)
-                self.speaker.speak(result)
-                return True
-        
-        # System info command
-        if "system" in text_lower and ("info" in text_lower or "status" in text_lower):
-            result = self.tools.get_system_info()
-            self.speaker.speak(result)
-            return True
-        
-        return False
-    
-    def process_input(self, user_input: str):
-        """
-        Process user input and generate response.
-        
-        Args:
-            user_input: User's speech as text
-        """
+            return
+
         try:
-            # Update GUI state
-            if self.gui:
-                self.gui.set_state(ZenGUI.STATE_THINKING)
+            if self.gui: self.gui.set_state("thinking")
             
-            # First check for direct keyword commands
-            if self._check_keyword_commands(user_input):
-                if self.gui:
-                    self.gui.set_state(ZenGUI.STATE_IDLE if not self.wake_word_mode else ZenGUI.STATE_WAKE_WORD)
-                return
-            
-            # If no keyword command, send to AI brain
             logger.info(f"Sending to AI: {user_input}")
             response = self.brain.get_response(user_input)
             
-            # Update GUI to speaking state
-            if self.gui:
-                self.gui.set_state(ZenGUI.STATE_SPEAKING)
+            content_to_speak = response.get("content", "I don't have a response.")
             
-            if response["type"] == "text":
-                self.speaker.speak(response["content"])
-            elif response["type"] == "tool_call":
-                # Handle tool calls
-                tool_result = response["content"]
-                self.speaker.speak(tool_result)
-            
-            # Return to idle
-            if self.gui:
-                self.gui.set_state(ZenGUI.STATE_IDLE if not self.wake_word_mode else ZenGUI.STATE_WAKE_WORD)
+            if self.gui: self.gui.set_state("speaking")
+            self.speaker.speak(content_to_speak)
             
         except Exception as e:
             logger.error(f"Error processing input: {e}", exc_info=True)
-            self.speaker.speak("I'm sorry, I encountered an error processing that.")
-            if self.gui:
-                self.gui.set_state(ZenGUI.STATE_IDLE if not self.wake_word_mode else ZenGUI.STATE_WAKE_WORD)
+            self.speaker.speak("I'm sorry, I encountered an error.")
+        finally:
+            if self.running and self.gui:
+                self.gui.set_state("idle" if not self.wake_word_mode else "wake_word")
     
     def _process_single_command(self):
-        """Process a single voice command (used by wake word mode)."""
         try:
-            if self.gui:
-                self.gui.set_state(ZenGUI.STATE_LISTENING)
-            
-            user_input = self.listener.listen(
-                timeout=Config.LISTEN_TIMEOUT,
-                phrase_time_limit=Config.PHRASE_TIME_LIMIT
-            )
+            if self.gui: self.gui.set_state("listening")
+            user_input = self.listener.listen(timeout=Config.LISTEN_TIMEOUT, phrase_time_limit=Config.PHRASE_TIME_LIMIT)
             
             if user_input:
                 print(f"\nYou: {user_input}")
                 self.process_input(user_input)
-            else:
-                if self.gui:
-                    self.gui.set_state(ZenGUI.STATE_WAKE_WORD)
-                    
+            elif self.gui:
+                self.gui.set_state("wake_word")
         except Exception as e:
             logger.error(f"Error in single command processing: {e}")
-            if self.gui:
-                self.gui.set_state(ZenGUI.STATE_WAKE_WORD)
+            if self.gui: self.gui.set_state("wake_word")
     
     def _announce_daily_tasks(self):
-        """Announce daily tasks on startup."""
         if Config.ANNOUNCE_TASKS_ON_STARTUP:
             try:
                 summary = self.task_manager.get_task_summary()
-                logger.info(f"Task summary: {summary}")
-                self.speaker.speak(summary)
+                if "no pending tasks" not in summary.lower():
+                     self.speaker.speak(summary)
             except Exception as e:
                 logger.error(f"Failed to announce tasks: {e}")
     
     def run(self):
-        """Main conversation loop."""
         self.running = True
-        
-        # Greet the user
-        if self.wake_word_mode:
-            greeting = f"Hello! I'm Zen. Say 'Zen', 'Activate', or 'Hey Zen' to talk to me."
-        else:
-            greeting = "Hello! I'm Zen, your voice assistant. How can I help you today?"
-        
-        print(f"\n{greeting}")
-        self.speaker.speak(greeting)
-        
-        # Announce daily tasks after greeting
+        self.speaker.speak("Hello! I'm Zen, your AI assistant. How can I help?")
         self._announce_daily_tasks()
         
-        print("\n" + "="*70)
-        print("🎤 ZEN VOICE ASSISTANT - Ready")
-        print("="*70)
-        
-        if self.wake_word_mode:
-            print(f"\n💡 Wake Word Mode: Say '{Config.WAKE_WORD}' to activate")
-            print(f"   (Listening passively...)")
-        else:
-            print("\n📝 Available Commands:")
-            print("   • 'What are my tasks for today?' / 'Add a task [description]'")
-            print("   • 'Open Notepad' / 'Open Calculator' / 'Open Chrome'")
-            print("   • 'What time is it?'")
-            print("   • 'Search for [topic]'")
-            print("   • 'What's the system status?'")
-            print("   • Ask me anything!")
-            print("   • Say 'exit' or 'goodbye' to quit")
-        
-        if self.gui:
-            print("\n🎨 GUI: Visual feedback enabled")
-            print("   (Look for the overlay in the corner of your screen)")
-        
+        print("\n" + "="*70 + "\n🎤 ZEN VOICE ASSISTANT - AI Tools & Vision Enabled\n" + "="*70)
+        if self.wake_word_mode: print("\n💡 Wake Word Mode: Say 'Zen' to activate.")
+        else: print("\n💡 Normal Mode: Ready for your command.")
+        if self.gui: print("🎨 GUI: Visual feedback enabled.")
         print("\n" + "="*70 + "\n")
         
-        # Set initial GUI state
-        if self.gui:
-            self.gui.set_state(ZenGUI.STATE_WAKE_WORD if self.wake_word_mode else ZenGUI.STATE_IDLE)
+        if self.gui: self.gui.set_state("wake_word" if self.wake_word_mode else "idle")
         
-        # Wake word mode: Start passive listening
         if self.wake_word_mode and self.wake_word_detector:
-            logger.info("Starting in wake word mode")
-            self.wake_word_detector.start()
-            
-            # Keep running while wake word detector is active
-            try:
-                import time
-                while self.running:
-                    time.sleep(0.5)
-            except KeyboardInterrupt:
-                print("\n\nInterrupted by user.")
-                self.speaker.speak("Shutting down. Goodbye!")
-            finally:
-                if self.wake_word_detector:
-                    self.wake_word_detector.stop()
-        
-        # Normal mode: Continuous listening
+            self._run_wake_word_mode()
         else:
-            while self.running:
-                try:
-                    # Update GUI state
-                    if self.gui:
-                        self.gui.set_state(ZenGUI.STATE_LISTENING)
-                    
-                    # Listen for user input
-                    user_input = self.listener.listen(
-                        timeout=Config.LISTEN_TIMEOUT,
-                        phrase_time_limit=Config.PHRASE_TIME_LIMIT
-                    )
-                    
-                    if user_input:
-                        print(f"\n🗣️  You: {user_input}")
-                        self.process_input(user_input)
-                        print()  # Add spacing
-                    else:
-                        # No speech detected, return to idle
-                        if self.gui:
-                            self.gui.set_state(ZenGUI.STATE_IDLE)
-                        continue
-                        
-                except KeyboardInterrupt:
-                    print("\n\nInterrupted by user.")
-                    self.speaker.speak("Shutting down. Goodbye!")
-                    break
-                except Exception as e:
-                    logger.error(f"Error in main loop: {e}", exc_info=True)
-                    self.speaker.speak("I encountered an error. Let me try again.")
-                    if self.gui:
-                        self.gui.set_state(ZenGUI.STATE_IDLE)
+            self._run_normal_mode()
         
-        # Cleanup
-        if self.gui:
-            self.gui.stop()
-        
+        if self.gui: self.gui.stop()
         logger.info("Zen Voice Assistant shutting down.")
 
+    def _run_wake_word_mode(self):
+        self.wake_word_detector.start()
+        try:
+            while self.running: time.sleep(0.5)
+        except KeyboardInterrupt:
+            print("\nInterrupted by user.")
+        finally:
+            self.speaker.speak("Goodbye!")
+            if self.wake_word_detector: self.wake_word_detector.stop()
+
+    def _run_normal_mode(self):
+        while self.running:
+            try:
+                if self.gui: self.gui.set_state("listening")
+                user_input = self.listener.listen(timeout=Config.LISTEN_TIMEOUT, phrase_time_limit=Config.PHRASE_TIME_LIMIT)
+                if user_input:
+                    print(f"\n🗣️  You: {user_input}")
+                    self.process_input(user_input)
+                elif self.gui:
+                    self.gui.set_state("idle")
+            except KeyboardInterrupt:
+                self.running = False
+                self.speaker.speak("Goodbye!")
+            except Exception as e:
+                logger.error(f"Error in main loop: {e}", exc_info=True)
+                if self.gui: self.gui.set_state("idle")
 
 def main():
-    """Entry point for the application."""
     print("""
     ╔══════════════════════════════════════════════════════════╗
     ║                                                          ║
-    ║          ZEN VOICE ASSISTANT v2.0 (Phase 4)             ║
-    ║          Your Personal AI Companion                      ║
-    ║                                                          ║
-    ║    ✨ Wake Word Detection  🎨 Visual Feedback           ║
-    ║    ⚡ Performance Optimized  📊 Enhanced Logging        ║
+    ║        ZEN VOICE ASSISTANT v4.0 - Futuristic Edition     ║
     ║                                                          ║
     ╚══════════════════════════════════════════════════════════╝
     """)
     
-    # Display feature status
+    gui_status = "✗ Disabled"
+    if Config.GUI_ENABLED:
+        gui_mode = Config.GUI_MODE
+        if (gui_mode == 'neural' and neural_gui_available) or (gui_mode == 'classic' and gui_available):
+            gui_status = f"✓ Enabled ({gui_mode})"
+        else:
+            gui_status = f"✗ Enabled but '{gui_mode}' not available"
+
     print("🔧 Feature Status:")
     print(f"   • AI Provider: {Config.AI_PROVIDER.upper()}")
+    print(f"   • GUI: {gui_status}")
+    print(f"   • Neural Voice: {'✓ Enabled' if Config.NEURAL_VOICE_ENABLED and neural_voice_available else '✗ Disabled'}")
+    print(f"   • Vision: {'✓ Enabled' if Config.ENABLE_VISION and vision_available else '✗ Disabled'}")
     print(f"   • Wake Word: {'✓ Enabled' if Config.WAKE_WORD_ENABLED and wake_word_available else '✗ Disabled'}")
-    print(f"   • GUI Overlay: {'✓ Enabled' if Config.GUI_ENABLED and gui_available else '✗ Disabled'}")
-    print(f"   • Logging: {'✓ File & Console' if Config.LOG_TO_FILE else '✓ Console Only'}")
     print()
     
-    # Validate configuration
     config_errors = Config.validate_config()
     if config_errors:
-        print("\n⚠️  Configuration Errors:")
-        for error in config_errors:
-            print(f"   - {error}")
-        print("\n💡 Please fix these errors in your .env file before running Zen.")
-        print("   Run 'python setup.py' for quick setup or edit .env manually.")
+        for error in config_errors: print(f"   - {error}")
         return
     
     try:
@@ -407,12 +316,6 @@ def main():
     except Exception as e:
         logger.error(f"Fatal error: {e}", exc_info=True)
         print(f"\n❌ Error: {e}")
-        print("\n💡 Troubleshooting:")
-        print("   1. Run: pip install -r requirements.txt")
-        print("   2. Configure .env with your API key (run: python setup.py)")
-        print("   3. Ensure microphone is connected")
-        print("   4. Check logs/ directory for detailed error information")
-
 
 if __name__ == "__main__":
     main()
