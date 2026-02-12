@@ -1,0 +1,85 @@
+/* Zen Modern GUI - Stylesheet */
+
+/* Main Window Background */
+QMainWindow {
+    background-color: transparent;
+}
+
+/* The central widget that holds everything, styled to look like glass */
+#centralWidget {
+    background-color: rgba(10, 14, 26, 240); /* Deep dark blue, slightly transparent */
+    border: 1px solid #00F0FF;
+    border-radius: 20px;
+}
+
+/* Labels */
+QLabel {
+    color: #E0E0E0;
+    font-family: "Segoe UI", "Consolas";
+    font-size: 14px;
+}
+
+#statusLabel {
+    color: #00F0FF;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+#mainText {
+    color: #FFFFFF;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Chat Input Bar */
+QLineEdit {
+    background-color: rgba(0, 0, 0, 100);
+    border: 1px solid #0080FF;
+    border-radius: 15px;
+    padding: 5px 15px;
+    color: #00F0FF;
+    font-size: 14px;
+    selection-background-color: #00F0FF;
+}
+
+QLineEdit:focus {
+    border: 1px solid #00FFAA;
+    background-color: rgba(0, 0, 0, 150);
+}
+
+/* Buttons (Futuristic) */
+QPushButton {
+    background-color: rgba(0, 240, 255, 20);
+    border: 1px solid #00F0FF;
+    border-radius: 10px;
+    color: #00F0FF;
+    padding: 5px;
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color: rgba(0, 240, 255, 60);
+    border: 1px solid #FFFFFF;
+}
+
+QPushButton:pressed {
+    background-color: rgba(0, 240, 255, 100);
+}
+
+/* Close/Minimize Buttons */
+#closeBtn {
+    background-color: transparent;
+    border: none;
+    color: #FF4444;
+    font-size: 16px;
+}
+#closeBtn:hover {
+    color: #FF8888;
+}
+
+#minBtn {
+    background-color: transparent;
+    border: none;
+    color: #00F0FF;
+    font-size: 16px;
+}
