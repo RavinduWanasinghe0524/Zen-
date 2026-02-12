@@ -73,7 +73,7 @@ class AIBrain:
                 })
 
             self.client = genai.GenerativeModel(
-                'gemini-1.5-flash',
+                'gemini-2.0-flash',
                 tools=gemini_tools
             )
             self.chat_session = self.client.start_chat(enable_automatic_function_calling=True)
@@ -148,7 +148,7 @@ class AIBrain:
 
     def _get_gemini_response(self, user_input: str) -> Dict:
         """Get response from Google Gemini, handling function calls."""
-        from google.generativeai.types import FunctionCall
+        from google.generativeai.protos import FunctionCall
         
         response = self.chat_session.send_message(user_input)
         

@@ -405,6 +405,7 @@ class NeuralGUI:
         num_bars = 16
         bar_width = 15
         spacing = 25
+        width = 430
         
         start_x = cx - (num_bars * spacing) // 2
         
