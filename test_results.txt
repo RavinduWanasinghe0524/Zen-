@@ -1,0 +1,109 @@
+<string>:28: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+INFO - Logging system initialized - Level: INFO, File logging: True
+
+
+============================================================
+     ZEN VOICE ASSISTANT - COMPREHENSIVE SYSTEM TEST
+============================================================
+
+======================================================================
+TESTING IMPORTS
+======================================================================
+
+Core Speech:
+  [OK] speech_recognition
+  [OK] pyttsx3
+
+AI Provider:
+  [OK] google.generativeai
+
+System Utils:
+  [OK] psutil
+  [OK] dotenv
+  [OK] pyautogui
+
+GUI:
+  [OK] tkinter
+
+Optional:
+  [OK] requests
+  [OK] json
+  [OK] threading
+  [OK] time
+
+======================================================================
+TESTING CONFIGURATION
+======================================================================
+
+Γ£ô Config loaded successfully
+  ΓÇó AI Provider: gemini
+  ΓÇó GUI Enabled: True
+  ΓÇó GUI Mode: neural
+  ΓÇó Wake Word Enabled: False
+  ΓÇó Speech Rate: 180 WPM
+
+Γ£ô Configuration is valid!
+
+======================================================================
+TESTING MAIN MODULES
+======================================================================
+  Γ£ô listen.py
+  Γ£ô speak.py
+  Γ£ô brain.py
+  Γ£ô tools.py
+  Γ£ô config.py
+  Γ£ô logger.py
+  Γ£ô daily_tasks.py
+  Γ£ô memory.py
+
+======================================================================
+TESTING GUI MODULES
+======================================================================
+  Γ£ô gui_neural.py - Neural GUI (Futuristic)
+  Γ£ô gui.py - Classic GUI
+
+======================================================================
+TESTING OPTIONAL MODULES
+======================================================================
+  Γ£ô wake_word.py - Wake Word Detection
+  Γ£ô ai_vision.py - AI Vision
+  Γ£ô voice_neural.py - Neural Voice
+  Γ£ô app_control.py - App Control
+
+======================================================================
+TESTING FILE STRUCTURE
+======================================================================
+  Γ£ô .env
+  Γ£ô requirements.txt
+  Γ£ô README.md
+  Γ£ô main.py
+  Γ£ô config.py
+  Γ£ô brain.py
+  Γ£ô listen.py
+  Γ£ô speak.py
+  Γ£ô tools.py
+
+======================================================================
+TESTING MAIN.PY SYNTAX
+======================================================================
+  Γ£ô main.py has no syntax errors
+
+======================================================================
+TEST SUMMARY
+======================================================================
+
+Tests Passed: 32/32
+
+Γ£ô ALL TESTS PASSED! System is ready to run.
+
+To start Zen Assistant, run:
+  python main.py
+
+======================================================================
