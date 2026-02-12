@@ -142,18 +142,18 @@ class ZenAssistant:
         
         # Register standard tools
         tool_methods = {
-            "open_application": ("Opens a desktop application.", {"app_name": {"type": "string", "description": "e.g., 'notepad', 'chrome'"}}),
+            "open_application": ("Opens a desktop application.", {"app_name": {"type": "STRING", "description": "e.g., 'notepad', 'chrome'"}}),
             "get_current_time": ("Gets the current date and time.", {}),
-            "search_web": ("Searches Google.", {"query": {"type": "string", "description": "The search term."}}),
+            "search_web": ("Searches Google.", {"query": {"type": "STRING", "description": "The search term."}}),
             "get_system_info": ("Gets computer CPU and memory usage.", {}),
-            "set_volume": ("Sets system volume.", {"level": {"type": "integer", "description": "Volume from 0-100."}}),
-            "shutdown_system": ("Shuts down the computer.", {"confirm": {"type": "boolean", "description": "Must be true."}}),
-            "restart_system": ("Restarts the computer.", {"confirm": {"type": "boolean", "description": "Must be true."}}),
-            "remember_fact": ("Stores a fact or preference in long-term memory.", {"fact": {"type": "string", "description": "The information to remember permanently."}}),
-            "recall_memories": ("Search long-term memory for information.", {"query": {"type": "string", "description": "The topic to search for."}}),
-            "control_media": ("Controls media playback (Spotify, etc).", {"action": {"type": "string", "enum": ["play", "pause", "next", "previous", "volume_up", "volume_down"], "description": "The media action to perform."}}),
-            "play_youtube": ("Plays a video on YouTube.", {"query": {"type": "string", "description": "The video to search for."}}),
-            "research_topic": ("Researches a topic online and provides a summary.", {"query": {"type": "string", "description": "The topic to research."}}),
+            "set_volume": ("Sets system volume.", {"level": {"type": "INTEGER", "description": "Volume from 0-100."}}),
+            "shutdown_system": ("Shuts down the computer.", {"confirm": {"type": "BOOLEAN", "description": "Must be true."}}),
+            "restart_system": ("Restarts the computer.", {"confirm": {"type": "BOOLEAN", "description": "Must be true."}}),
+            "remember_fact": ("Stores a fact or preference in long-term memory.", {"fact": {"type": "STRING", "description": "The information to remember permanently."}}),
+            "recall_memories": ("Search long-term memory for information.", {"query": {"type": "STRING", "description": "The topic to search for."}}),
+            "control_media": ("Controls media playback (Spotify, etc).", {"action": {"type": "STRING", "enum": ["play", "pause", "next", "previous", "volume_up", "volume_down"], "description": "The media action to perform."}}),
+            "play_youtube": ("Plays a video on YouTube.", {"query": {"type": "STRING", "description": "The video to search for."}}),
+            "research_topic": ("Researches a topic online and provides a summary.", {"query": {"type": "STRING", "description": "The topic to research."}}),
         }
 
         for name, (desc, props) in tool_methods.items():
@@ -161,7 +161,7 @@ class ZenAssistant:
                 name=name,
                 description=desc,
                 function=getattr(self.tools, name),
-                parameters={"type": "object", "properties": props, "required": list(props.keys())}
+                parameters={"type": "OBJECT", "properties": props, "required": list(props.keys())}
             )
 
         # Register vision tools if available
@@ -171,10 +171,10 @@ class ZenAssistant:
                 description="Analyzes the content of the screen and answers a question about it.",
                 function=self.vision.analyze_screen,
                 parameters={
-                    "type": "object",
+                    "type": "OBJECT",
                     "properties": {
                         "question": {
-                            "type": "string",
+                            "type": "STRING",
                             "description": "The question to ask about the screen's content."
                         }
                     },
